@@ -5,6 +5,15 @@
   "main": "src/main.js",
   "author": "Gombb <primegombb@protonmail.com>",
   "license": "MIT",
+  "scripts": {
+    "start": "node src/main",
+    "start:docs": "node resources/swagger.js && nodemon src/main",
+    "generate-docs": "node resources/swagger.js",
+    "start:dev": "nodemon src/main",
+    "test:unit": "jest --coverage",
+    "lint": "eslint ./src & eslint ./test",
+    "lint:fix": "eslint ./src --fix; eslint ./test --fix"
+  },
   "dependencies": {
     "dotenv": "^16.0.1",
     "express": "^4.18.1"
