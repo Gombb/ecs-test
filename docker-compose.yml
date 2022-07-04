@@ -1,0 +1,12 @@
+version: '3.4'
+services:
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.codebuild
+    volumes:
+      - ./src:/usr/app/src
+    ports:
+      - ${DOCKER_EXTERNAL_SERVER_PORT:-5000}:${SERVER_PORT:-5000}
+    environment:
+      - SERVER_PORT=${SERVER_PORT}

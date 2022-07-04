@@ -1,0 +1,35 @@
+version: 0.2
+
+env:
+  variables:
+    SERVICE_PORT: 80
+    JSON: ""
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - $(aws ecr get-login --region $AWS_REGION --no-include-email)
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Getting the DB secret...
+      - SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id $SERVICE_SECRET_NAME)
+      - echo $JSON
+      - echo $SECRET_JSON
+      - echo Building the Docker image...
+      - docker build -f Dockerfile.codebuild -t $REPOSITORY_URI:latest --build-arg SERVICE_PORT --build-arg $SERVICE_SECRET_NAME  .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo Writing image definitions file...
+      - printf '[{"name":"%s","imageUri":"%s"}]' $REPO_NAME $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+artifacts:
+  files: imagedefinitions.json

@@ -1,0 +1,15 @@
+FROM node:17
+
+ARG SERVICE_SECRET_NAME
+ENV SERVICE_SECRET_NAME $SERVICE_SECRET_NAME
+
+ENV APP_DIR /usr/app
+RUN mkdir -p $APP_DIR
+WORKDIR $APP_DIR
+
+COPY package.json yarn.lock ./
+COPY resources resources
+COPY src src
+RUN yarn install --no-progress
+# RUN yarn generate-docs
+CMD yarn start
